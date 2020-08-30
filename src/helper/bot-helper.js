@@ -5,10 +5,10 @@
 
 import sharp from "sharp";
 import { overlayImage } from "./image-helper.js";
-import { dlFile } from "./common-helper.js";
+import { dlFile, dlFileToFile } from "./common-helper.js";
 var https = require('https');
 
-const TOKEN = process.env.TELEGRAM_TOKEN || "678473327:AAEBINgsW74GVHaloIlKe9VFTG6VTeYJV4g";
+const TOKEN = process.env.TELEGRAM_TOKEN || "678473327:AAEhecNnoRB5e2PvFUpTc0bpE82loli6iZA";
 import TelegramBot from "node-telegram-bot-api";
 const request = require("request");
 const options = {
@@ -16,79 +16,33 @@ const options = {
 };
 const bot = new TelegramBot(TOKEN, options);
 
-bot.on('message', function (msg) {
+bot.on('message', msg => {
+    console.log("Message received. msg.message_id: " + msg.message_id);
+
     if (msg.photo != undefined) {
-        bot.getFile(msg.photo[0].file_id).then(fileData => {
-            console.log(fileData);
-            console.log(fileData.fileUri);
-return;
+        const fileId = msg.photo[2].file_id;
 
-            bot.getFile(fileData.file_id).then(async (fileUri) => {
-                console.log("fileUri-Started");
-                console.log(fileUri);
-                console.log("fileUri-Ended");
+        bot.getFile(fileId).then(async fileUri => {
+            const fileUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileUri.file_path}`;
 
-                return;
-                dlFile(fileUri, (body) => {
+            dlFile(fileUrl, body => {
+                console.log(body);
+                const in1 = "img/father.png";
+                const in2 = "img/example.jpg";
+                const out = "img/output/02.jpg";
 
-                    sharp("img/father.png")
-                        .composite([{ input: body, gravity: "southeast" }])
-                        .png()
-                        .toBuffer()
-                        .then(data => {
-                            bot.sendPhoto(msg.chat.id, data, {
-                                caption: "I'm a bot!"
-                            });
-                        });
+                sharp(in1)
+                    //.resize(300, 200)
+                    .toBuffer()
+                    .then(outputBuffer => {
+                        // outputBuffer contains upside down, 300px wide, alpha channel flattened
+                        // onto orange background, composited with overlay.png with SE gravity,
+                        // sharpened, with metadata, 90% quality WebP image data. Phew!
 
-                    // .resize(800)
-                    // .composite([{ input: "img/father.png", gravity: "southeast" }])
-                    // .toBuffer()
-                    // .then(outputBuffer => {
-                    //     console.log(outputBuffer)
-                    // });
-                });
-
-
-
-
+                        bot.sendPhoto(msg.chat.id, outputBuffer);
+                        console.log(outputBuffer)
+                    });;
             });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            return;
-
-            const opts = {
-                reply_markup: {
-                    inline_keyboard: [
-                        [{
-                            text: "#من_پدر_فرزندپذیرم - 👨‍🦰",
-                            callback_data: "father"
-                        }],
-                        [{
-                            text: "#من_مادر_فرزندپذیرم - 👱‍♀️",
-                            callback_data: "mother"
-                        }],
-                        [{
-                            text: "#ما_والدین_فرزندپذیریم - 👨‍👨‍👦",
-                            callback_data: "parents"
-                        }]
-                    ]
-                }
-            };
-
-            bot.sendMessage(msg.from.id, "لطفاً یک هشتگ را انتخاب کنید...", opts);
         });
     }
 });
