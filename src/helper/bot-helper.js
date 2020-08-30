@@ -17,34 +17,29 @@ const options = {
 const bot = new TelegramBot(TOKEN, options);
 
 bot.on('message', msg => {
-    console.log("Message received. msg.message_id: " + msg.message_id);
+    // Show a log
+    console.log("Message received.");
+    console.log(msg);
 
-    if (msg.photo != undefined) {
-        const fileId = msg.photo[2].file_id;
+    if (msg.photo == undefined)
+        return;
 
-        bot.getFile(fileId).then(async fileUri => {
-            const fileUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileUri.file_path}`;
+    const fileId = msg.photo[msg.photo.length - 1].file_id;
 
-            dlFile(fileUrl, body => {
-                console.log(body);
-                const in1 = "img/father.png";
-                const in2 = "img/example.jpg";
-                const out = "img/output/02.jpg";
+    bot.getFile(fileId).then(async fileUri => {
+        const fileUrl = `https://api.telegram.org/file/bot${TOKEN}/${fileUri.file_path}`;
 
-                sharp(in1)
-                    //.resize(300, 200)
-                    .toBuffer()
-                    .then(outputBuffer => {
-                        // outputBuffer contains upside down, 300px wide, alpha channel flattened
-                        // onto orange background, composited with overlay.png with SE gravity,
-                        // sharpened, with metadata, 90% quality WebP image data. Phew!
+        dlFile(fileUrl, imgStream => {
+            console.log(imgStream);
+            const in1 = "img/father.png";
+            const in2 = "img/example.jpg";
+            const out = "img/output/02.jpg";
 
-                        bot.sendPhoto(msg.chat.id, outputBuffer);
-                        console.log(outputBuffer)
-                    });;
+            overlayImage(imgStream, "father", outImgStream => {
+                bot.sendPhoto(msg.chat.id, outImgStream);
             });
         });
-    }
+    });
 });
 
 // Handle callback queries
