@@ -1,7 +1,9 @@
 import sharp from "sharp";
 
 const overlayImageInfo = {
-    father: "./img/father.png"
+    father: "./img/father.png",
+    mother: "./img/mother.png",
+    parents: "./img/parents.png",
 };
 
 const getImageMetadata = async imgStreamOrPath => {
