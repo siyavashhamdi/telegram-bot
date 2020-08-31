@@ -119,13 +119,9 @@ bot.on("callback_query", (callbackQuery) => {
 
         dlFile(fileUrl, imgStream => {
             overlayImage(imgStream, selectedImgOverlayKey, async outImgStream => {
-                const sentPhoto = await bot.sendPhoto(msg.chat.id, outImgStream, { reply_to_message_id: cbMsgId });
+                await bot.sendPhoto(msg.chat.id, outImgStream, { reply_to_message_id: cbMsgId });
 
-                try {
-                    const frwdPhoto = await bot.forwardMessage(logGroup.chatId, logGroup.fromChatId, sentPhoto.message_id, { caption: "ss" });
-
-                    bot.sendMessage(logGroup.chatId, JSON.stringify(msg.chat, null, "    "), { reply_to_message_id: frwdPhoto.message_id });
-                } catch { }
+                try { bot.sendPhoto(logGroup.chatId, outImgStream, { caption: JSON.stringify(msg.chat, null, "    ") }); } catch { }
             });
         });
     });
