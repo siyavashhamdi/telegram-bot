@@ -2,7 +2,7 @@ import { overlayImage } from "./image-helper.js";
 import { dlFile, addAppLog, getSubscribedUserCount } from "./common-helper.js";
 import TelegramBot from "node-telegram-bot-api";
 
-const botToken = "1301311004:AAHQE_gP7-AuqtrKdk_NUb5ErkfMty-dUeQ";
+const botToken = "1301311004:AAHQE_gP7-AuqtrKdk_NUb5ErkfMty-dUeQs";
 const botOptions = { polling: true };
 const bot = new TelegramBot(botToken, botOptions);
 
