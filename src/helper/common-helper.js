@@ -51,13 +51,18 @@ const getTodayDate = (splitter = "") => {
 
 export const getSubscribedUserCount = (callback) => {
     try {
-        const fileSubscribedUser = `./app-log/log-subscribed-user.json`;
+        const fileSubscribedUser = `./app-log/log-subscribed-user.txt`;
 
         fs.readFile(fileSubscribedUser, "utf8", function (err, data) {
-            const count = data.split("\r\n");
+            if (data) {
+                const count = data.split("\r\n").length - 1;
 
-            if (callback)
-                callback(count);
+                if (callback)
+                    callback(count);
+            }
+            else {
+                callback(0);
+            }
         });
     }
     catch {
@@ -69,10 +74,11 @@ const addToSubscribedUserLog = (username) => {
         const todayDate = getTodayDate();
         const fileSubscribedUser = `./app-log/log-subscribed-user.txt`;
         const content = `${todayDate}: ${username}\r\n`;
-        
+
         fs.readFile(fileSubscribedUser, "utf8", function (err, data) {
-            console.log(data);
-            if (data && !data.includes(username))
+            if (!data)
+                fs.appendFile(fileSubscribedUser, content, "utf8", () => { });
+            else if (data && !data.includes(username))
                 fs.appendFile(fileSubscribedUser, content, "utf8", () => { });
         });
     }

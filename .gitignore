@@ -111,4 +111,4 @@ yarn.lock
 /*.rar
 
 # Log files
-app-log/2*
+app-log/*

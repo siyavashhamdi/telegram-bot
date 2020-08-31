@@ -22,7 +22,7 @@ bot.on('message', msg => {
     if (msg?.text === "/start")
         bot.sendMessage(msg.from.id, "سلام، خوش آمدید.\r\nبرای شروع تصویری را بارگذاری نمایید.");
 
-    if (msg?.text === "/get-subscribed-user-count") {
+    if (msg?.text === "/getSubscribedUserCount") {
 
         getSubscribedUserCount(count => {
             const sendData = `تعداد افراد استفاده‌کننده: ${count}`;
