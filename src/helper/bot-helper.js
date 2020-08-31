@@ -1,8 +1,8 @@
 import { overlayImage } from "./image-helper.js";
-import { dlFile, addAppLog } from "./common-helper.js";
+import { dlFile, addAppLog, getSubscribedUserCount } from "./common-helper.js";
 import TelegramBot from "node-telegram-bot-api";
 
-const botToken = "333446529:AAFBWwDRV4eQ_3d19z8cPVvaLApuUX3cxmI";
+const botToken = "1301311004:AAHQE_gP7-AuqtrKdk_NUb5ErkfMty-dUeQ";
 const botOptions = { polling: true };
 const bot = new TelegramBot(botToken, botOptions);
 
@@ -21,6 +21,14 @@ bot.on('message', msg => {
 
     if (msg?.text === "/start")
         bot.sendMessage(msg.from.id, "سلام، خوش آمدید.\r\nبرای شروع تصویری را بارگذاری نمایید.");
+
+    if (msg?.text === "/get-subscribed-user-count") {
+
+        getSubscribedUserCount(count => {
+            const sendData = `تعداد افراد استفاده‌کننده: ${count}`;
+            bot.sendMessage(msg.from.id, sendData);
+        });
+    }
 
     if (msg.photo == undefined)
         return;

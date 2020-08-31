@@ -112,4 +112,4 @@ yarn.lock
 
 # Log files
 app-log/
-
+!app-log/log-subscribed-user.txt
