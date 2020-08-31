@@ -60,6 +60,10 @@ bot.on('message', msg => {
                 [{
                     text: "#ما_والدین_فرزندپذیریم - 👨‍👨‍👦",
                     callback_data: `parents_${msg.message_id}`
+                }],
+                [{
+                    text: "#من_فرزندخوانده‌ام - 👦👧",
+                    callback_data: `adopted_${msg.message_id}`
                 }]
             ]
         },
@@ -103,6 +107,11 @@ bot.on("callback_query", (callbackQuery) => {
 
         case "parents":
             // text = "👨‍👨‍👦";
+            selectedImgOverlayKey = cbDataAction;
+            break;
+
+        case "adopted":
+            // text = "👦👧";
             selectedImgOverlayKey = cbDataAction;
             break;
 

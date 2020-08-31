@@ -4,6 +4,7 @@ const overlayImageInfo = {
     father: "./img/father.png",
     mother: "./img/mother.png",
     parents: "./img/parents.png",
+    adopted: "./img/adopted.png",
 };
 
 const getImageMetadata = async imgStreamOrPath => {
@@ -18,13 +19,13 @@ export const overlayImage = async (imgStreamMain, imgOverlayKey, callback) => {
     const imgMainMetadata = await getImageMetadata(imgStreamMain);
     const imgOverlayMetadata = await getImageMetadata(selectdOverlayPath);
 
-    let imgSharp = sharp(imgStreamMain);
+    let imgMainSharp = sharp(imgStreamMain);
 
     if (true) {
-        imgSharp = imgSharp.resize(imgOverlayMetadata.width, imgOverlayMetadata.height);
+        imgMainSharp = imgMainSharp.resize(imgOverlayMetadata.width, imgOverlayMetadata.height);
     }
 
-    imgSharp
+    imgMainSharp
         .composite([{ input: overlayImageInfo[imgOverlayKey], gravity: "southeast" }])
         .toBuffer()
         .then(outputBuffer => {
